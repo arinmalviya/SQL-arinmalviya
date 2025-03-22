@@ -1,0 +1,113 @@
+db.sales.insertMany([
+	{ "_id" : 1, "item" : "Americanos", "price" : 5, "size": "Short", "quantity" : 22, "date" : ISODate("2022-01-15T08:00:00Z") },
+	{ "_id" : 2, "item" : "Cappuccino", "price" : 6, "size": "Short","quantity" : 12, "date" : ISODate("2022-01-16T09:00:00Z") },
+	{ "_id" : 3, "item" : "Lattes", "price" : 15, "size": "Grande","quantity" : 25, "date" : ISODate("2022-01-16T09:05:00Z") },
+	{ "_id" : 4, "item" : "Mochas", "price" : 25,"size": "Tall", "quantity" : 11, "date" : ISODate("2022-02-17T08:00:00Z") },
+	{ "_id" : 5, "item" : "Americanos", "price" : 10, "size": "Grande","quantity" : 12, "date" : ISODate("2022-02-18T21:06:00Z") },
+	{ "_id" : 6, "item" : "Cappuccino", "price" : 7, "size": "Tall","quantity" : 20, "date" : ISODate("2022-02-20T10:07:00Z") },
+	{ "_id" : 7, "item" : "Lattes", "price" : 25,"size": "Tall", "quantity" : 30, "date" : ISODate("2022-02-21T10:08:00Z") },
+	{ "_id" : 8, "item" : "Americanos", "price" : 10, "size": "Grande","quantity" : 21, "date" : ISODate("2022-02-22T14:09:00Z") },
+	{ "_id" : 9, "item" : "Cappuccino", "price" : 10, "size": "Grande","quantity" : 17, "date" : ISODate("2022-02-23T14:09:00Z") },
+	{ "_id" : 10, "item" : "Americanos", "price" : 8, "size": "Tall","quantity" : 15, "date" : ISODate("2022-02-25T14:09:00Z")}
+]);
+
+
+// This query finds all documents where "item" is "Mochas"
+db.sales.find({ "item": "Mochas" });
+
+
+// Find all documents where the price is less than 15
+db.sales.find({ 
+    "price": { $lt: 15 }  // $lt (less than) operator filters prices below 15
+});
+
+
+// Find all documents where the price is either less than 10 or greater than 20
+db.sales.find({ 
+    $or: [
+        { "price": { $lt: 10 } },  // Condition 1: Price is less than 10
+        { "price": { $gt: 20 } }   // Condition 2: Price is greater than 20
+    ] 
+});
+
+
+// Find all documents where the "quantity" field exists
+db.sales.find({ 
+    "quantity": { $exists: true }  // Checks if the "quantity" field is present
+});
+
+// Find all documents where the "color" array contains "white"
+db.sales.find({ 
+    "color": "white"  // Checks if "white" is present in the "color" array
+});
+
+// Update the RAM of the product where "name" is "xTablet"
+db.products.updateOne(
+    { "name": "xTablet" },  // Find the document where name is "xTablet"
+    { $set: { "spec.ram": 24 } }  // Update the "ram" field inside "spec"
+);
+
+
+// Find all products and return only the "spec" field
+db.products.find({}, { "spec": 1, "_id": 0 });
+
+
+// Find all products and sort them by "price" in descending order
+db.products.find().sort({ "price": -1 });
+
+
+// Skip the first product and return the next 2 products
+db.products.find().skip(1).limit(2);
+
+
+// Find products where "name" starts with "S" and "price" is greater than 700
+db.products.find({
+    "name": { $regex: /^S/ },  // Matches names starting with "S"
+    "price": { $gt: 700 }      // Filters products with price > 700
+});
+
+
+
+// Calculate the total price of all products
+db.products.aggregate([
+    {
+        $group: {
+            _id: null,          // No grouping field, as we need a total sum
+            totalPrice: { $sum: "$price" }  // Summing the "price" field
+        }
+    }
+]);
+
+
+
+// Retrieve only the "size" field from each document
+db.sales.find({}, { "size": 1, "_id": 0 });
+
+
+db.sales.aggregate([
+    {
+        $match: { "size": "Tall" }  // Filter items where size is "Tall"
+    },
+    {
+        $group: {
+            _id: "$item",          // Group by item name
+            totalQuantity: { $sum: "$quantity" },  // Sum up the quantity of each item
+            totalPrice: { $sum: { $multiply: ["$price", "$quantity"] } } // Calculate total price
+        }
+    }
+]);
+
+// 15. How do you group by items and calculate the total number of items and average price in a single aggregation?
+db.sales.aggregate([
+    {
+        // Step 1: Grouping documents based on the "item" field
+        $group: {
+            _id: "$item",                 // Group by item name
+            totalItems: { $sum: 1 },      // Count the number of occurrences of each item
+            avgPrice: { $avg: "$price" }  // Calculate the average price of each item
+        }
+    }
+]);
+
+
+
