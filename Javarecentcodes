@@ -51,3 +51,49 @@ public class ListOfCollection {
       } 
    }
 }
+
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Scanner;
+
+public class AuthSystem {
+    // Simulated database of users (username -> password)
+    private static Map<String, String> userDB = new HashMap<>();
+
+    static {
+        // Adding some test users
+        userDB.put("admin", "admin123");
+        userDB.put("user1", "password1");
+        userDB.put("user2", "password2");
+    }
+
+    public static boolean authenticateUser(String username, String password) {
+        return userDB.containsKey(username) && userDB.get(username).equals(password);
+    }
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.print("Enter username: ");
+        String username = scanner.nextLine();
+
+        System.out.print("Enter password: ");
+        String password = scanner.nextLine();
+
+        if (authenticateUser(username, password)) {
+            System.out.println("Authentication successful! You can now perform your tasks.");
+            performUserTasks();
+        } else {
+            System.out.println("Invalid username or password. Access denied.");
+        }
+
+        scanner.close();
+    }
+
+    public static void performUserTasks() {
+        System.out.println("Performing user tasks...");
+        // Add logic for user-specific operations here
+    }
+}
+
